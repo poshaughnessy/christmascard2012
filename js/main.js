@@ -2,7 +2,7 @@ var camera;
 var cssScene, cssRenderer;
 var canvasScene, canvasRenderer;
 
-var cardFront;
+var cardFront, cardFrontContainer; // Container is for rotating around card edge
 
 var particle;
 var particles = [];
@@ -28,10 +28,17 @@ function init() {
     cardFrontEl.style.background = new THREE.Color( 0xeeeeee ).getContextStyle();
 
     cardFront = new THREE.CSS3DObject( cardFrontEl );
-    cardFront.position.x = 0;
+    cardFront.position.x = 150;
     cardFront.position.y = 0;
     cardFront.position.z = 0;
-    cssScene.add( cardFront );
+
+    cardFrontContainer = new THREE.Object3D();
+    cardFrontContainer.x = -150;
+
+    cardFrontContainer.add( cardFront );
+
+
+    cssScene.add( cardFrontContainer );
 
     //
 
@@ -66,8 +73,8 @@ function openCard() {
 
     console.log('Open card');
 
-    new TWEEN.Tween( cardFront.rotation )
-            .to( { y: cardFront.rotation.y - (RAD_180) }, 1000 )
+    new TWEEN.Tween( cardFrontContainer.rotation )
+            .to( { y: cardFrontContainer.rotation.y - (RAD_180) }, 1000 )
             .easing( TWEEN.Easing.Quadratic.InOut )
             .start();
 
@@ -77,8 +84,8 @@ function closeCard() {
 
     console.log('Close card');
 
-    new TWEEN.Tween( cardFront.rotation )
-            .to( { y: cardFront.rotation.y + (RAD_180) }, 1000 )
+    new TWEEN.Tween( cardFrontContainer.rotation )
+            .to( { y: cardFrontContainer.rotation.y + (RAD_180) }, 1000 )
             .easing( TWEEN.Easing.Quadratic.InOut )
             .start();
 
