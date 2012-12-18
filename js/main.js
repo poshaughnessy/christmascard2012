@@ -1,15 +1,16 @@
 var camera;
 var cssScene, cssRenderer;
 var canvasScene, canvasRenderer;
+var webglScene, webglRenderer;
 
 var cardFront, cardFrontContainer; // Container is for rotating around card edge
 
 var particle;
 var particles = [];
 var particleImage = new Image();
-particleImage.src = 'images/ParticleSmoke.png';
 
-var RAD_90 = Math.PI / 2;
+var loader;
+
 var RAD_180 = Math.PI;
 
 init();
@@ -20,12 +21,10 @@ function init() {
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.set( 0, 0, 400 );
 
-    cssScene = new THREE.Scene();
-
     var cardFrontEl = document.createElement( 'div' );
     cardFrontEl.style.width = '300px';
     cardFrontEl.style.height = '450px';
-    cardFrontEl.style.background = new THREE.Color( 0xeeeeee ).getContextStyle();
+    cardFrontEl.style.background = new THREE.Color( 0xeeeeee );//.getContextStyle();
 
     cardFront = new THREE.CSS3DObject( cardFrontEl );
     cardFront.position.x = 150;
@@ -37,10 +36,12 @@ function init() {
 
     cardFrontContainer.add( cardFront );
 
-
-    cssScene.add( cardFrontContainer );
+    // XXX Remove for now...
+    //cssScene.add( cardFrontContainer );
 
     //
+
+    cssScene = new THREE.Scene();
 
     cssRenderer = new THREE.CSS3DRenderer();
     cssRenderer.setSize( window.innerWidth, window.innerHeight );
@@ -48,11 +49,51 @@ function init() {
     cssRenderer.domElement.style.top = 0;
     document.body.appendChild( cssRenderer.domElement );
 
+    //
+
+    webglScene = new THREE.Scene();
+
+    webglRenderer = new THREE.WebGLRenderer();
+    webglRenderer.setSize( window.innerWidth, window.innerHeight );
+    webglRenderer.domElement.style.position = 'absolute';
+    webglRenderer.domElement.style.top = 0;
+    document.body.appendChild( webglRenderer.domElement );
+
+    loader = new THREE.JSONLoader();
+
+    loader.load( 'models/jack/jackinabox.js', function ( geometry ) {
+
+        console.log('xxx geometry:', geometry);
+
+        var materials = [];
+        materials.push( new THREE.MeshBasicMaterial({color: 0xffffff}) );
+
+        //console.log('xxx materials: ', materials);
+
+        var model = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+        model.geometry.computeFaceNormals();
+        model.geometry.computeVertexNormals();
+
+        // XXX may need to change this - otherwise remove
+        var modelScale = 1;
+
+        model.scale.set(modelScale, modelScale, modelScale);
+
+        model.position.set(0, 0, 0);
+
+        webglScene.add( model );
+
+        webglRenderer.render( webglScene, camera )
+
+    });
+
+    //
+
+    initSnow();
+
     window.addEventListener( 'resize', onWindowResize, false );
 
     document.addEventListener('keydown', onKeyDown, false);
-
-    initSnow();
 
 }
 
@@ -66,6 +107,7 @@ function animate() {
 
     cssRenderer.render( cssScene, camera );
     canvasRenderer.render( canvasScene, camera );
+    //webglRenderer.render( webglScene, camera ); // XXX Put back when I can get it working
 
 }
 
@@ -106,6 +148,8 @@ function initSnow() {
 
     canvasRenderer = new THREE.CanvasRenderer();
     canvasRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    particleImage.src = 'images/ParticleSmoke.png';
     var material = new THREE.ParticleBasicMaterial( { map: new THREE.Texture(particleImage) } );
 
     for (var i = 0; i < 100; i++) {
@@ -155,6 +199,7 @@ function onWindowResize() {
 
     cssRenderer.setSize( window.innerWidth, window.innerHeight );
     canvasRenderer.setSize( window.innerWidth, window.innerHeight );
+    webglRenderer.setSize( window.innerWidth, window.innerHeight );
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
