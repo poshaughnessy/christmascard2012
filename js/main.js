@@ -4,13 +4,13 @@ var canvasScene, canvasRenderer;
 
 var cardFront;
 
-var openingCard = false;
-
 var particle;
 var particles = [];
 var particleImage = new Image();
 particleImage.src = 'images/ParticleSmoke.png';
 
+var RAD_90 = Math.PI / 2;
+var RAD_180 = Math.PI;
 
 init();
 animate();
@@ -53,15 +53,7 @@ function animate() {
 
     requestAnimationFrame( animate );
 
-    if( openingCard ) {
-
-        if( cardFront.rotation.y < (45 / 180 * Math.PI) ) {
-
-            // TODO tween...
-
-        }
-
-    }
+    TWEEN.update();
 
     animateSnow();
 
@@ -72,7 +64,23 @@ function animate() {
 
 function openCard() {
 
-    openingCard = true;
+    console.log('Open card');
+
+    new TWEEN.Tween( cardFront.rotation )
+            .to( { y: cardFront.rotation.y - (RAD_180) }, 1000 )
+            .easing( TWEEN.Easing.Quadratic.InOut )
+            .start();
+
+}
+
+function closeCard() {
+
+    console.log('Close card');
+
+    new TWEEN.Tween( cardFront.rotation )
+            .to( { y: cardFront.rotation.y + (RAD_180) }, 1000 )
+            .easing( TWEEN.Easing.Quadratic.InOut )
+            .start();
 
 }
 
@@ -151,6 +159,10 @@ function onKeyDown(event) {
     if (/^(input|textarea)$/i.test(event.target.nodeName)) return;
 
     switch (event.keyCode) {
+        case 37: // left arrow
+        case 38: // up arrow
+            closeCard();
+            break;
         case 39: // right arrow
         case 40: // down arrow
         case 32: // space
