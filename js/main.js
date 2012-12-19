@@ -106,7 +106,7 @@ function init() {
     var ambientLight = new THREE.AmbientLight( 0xdddddd );
     webglScene.add( ambientLight );
 
-    var spotlight = new THREE.SpotLight(0xFFFFFF, 0.2, 2000);
+    var spotlight = new THREE.SpotLight(0xFFFFFF, 0.6, 2000);
     spotlight.position.set( 2000, 1000, 1500 );
     spotlight.target.position.set( 0, 50, 0 );
     spotlight.castShadow = true;
