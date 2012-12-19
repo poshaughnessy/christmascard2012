@@ -59,31 +59,78 @@ function init() {
     webglRenderer.domElement.style.top = 0;
     document.body.appendChild( webglRenderer.domElement );
 
+
+    //
+
+    var texture = new THREE.Texture();
+
+    /*
+    var loader = new THREE.ImageLoader();
+    loader.addEventListener( 'load', function ( event ) {
+
+        texture.image = event.content;
+        texture.needsUpdate = true;
+
+    } );
+    loader.load( 'models/jack/Gift-Wrapping-Paper.jpg' );
+    */
+
+    //
+
+    /* This is loading in the model but not the textures... */
+    /*
+    loader = new THREE.OBJLoader();
+
+    loader.addEventListener( 'load', function ( event ) {
+
+        var object = event.content;
+
+        for ( var i = 0, l = object.children.length; i < l; i ++ ) {
+            //object.children[ i ].material.map = texture;
+            console.log( object.children[i].material );
+        }
+
+        object.position.set( 0, 50, 0 );
+        object.scale.set(20, 20, 20);
+
+        webglScene.add( object );
+
+        webglRenderer.render( webglScene, camera )
+
+    });
+    loader.load( 'models/jack/jackinabox.obj' );
+    */
+
+    //
+
+    var ambientLight = new THREE.AmbientLight( 0xdddddd );
+    webglScene.add( ambientLight );
+
+    var spotlight = new THREE.SpotLight(0xFFFFFF, 0.2, 2000);
+    spotlight.position.set( 2000, 1000, 1500 );
+    spotlight.target.position.set( 0, 50, 0 );
+    spotlight.castShadow = true;
+    webglScene.add( spotlight );
+
+    //
+
     loader = new THREE.JSONLoader();
 
-    loader.load( 'models/jack/jackinabox.js', function ( geometry ) {
+    loader.load( 'models/jack/jackinabox.js', function ( geometry, materials ) {
 
         console.log('xxx geometry:', geometry);
-
-        var materials = [];
-        materials.push( new THREE.MeshBasicMaterial({color: 0xffffff}) );
-
-        //console.log('xxx materials: ', materials);
+        console.log('xxx materials: ', materials);
 
         var model = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
         model.geometry.computeFaceNormals();
         model.geometry.computeVertexNormals();
 
-        // XXX may need to change this - otherwise remove
-        var modelScale = 1;
-
+        var modelScale = 20;
         model.scale.set(modelScale, modelScale, modelScale);
 
-        model.position.set(0, 0, 0);
+        model.position.set(0, 50, 0);
 
         webglScene.add( model );
-
-        webglRenderer.render( webglScene, camera )
 
     });
 
@@ -107,7 +154,7 @@ function animate() {
 
     cssRenderer.render( cssScene, camera );
     canvasRenderer.render( canvasScene, camera );
-    //webglRenderer.render( webglScene, camera ); // XXX Put back when I can get it working
+    webglRenderer.render( webglScene, camera );
 
 }
 
