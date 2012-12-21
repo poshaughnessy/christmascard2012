@@ -11,6 +11,11 @@ var particleImage = new Image();
 
 var loader;
 
+var robot;
+
+var FOV = 50;
+var NEAR = 1;
+var FAR = 10000;
 var RAD_180 = Math.PI;
 
 init();
@@ -18,8 +23,9 @@ animate();
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.set( 0, 0, 400 );
+    camera = new THREE.PerspectiveCamera( FOV, window.innerWidth / window.innerHeight, NEAR, FAR );
+    camera.position.set( 0, 500, 1000 );
+    camera.lookAt( new THREE.Vector3(0, 100, -500) );
 
     var cardFrontEl = document.createElement( 'div' );
     cardFrontEl.style.width = '300px';
@@ -53,7 +59,7 @@ function init() {
 
     webglScene = new THREE.Scene();
 
-    webglRenderer = new THREE.WebGLRenderer();
+    webglRenderer = new THREE.WebGLRenderer({ antialias: true });
     webglRenderer.setSize( window.innerWidth, window.innerHeight );
     webglRenderer.domElement.style.position = 'absolute';
     webglRenderer.domElement.style.top = 0;
@@ -103,17 +109,22 @@ function init() {
 
     //
 
-    var ambientLight = new THREE.AmbientLight( 0xdddddd );
+    var ambientLight = new THREE.AmbientLight( 0x101010 );
     webglScene.add( ambientLight );
 
-    var spotlight = new THREE.SpotLight(0xFFFFFF, 0.6, 2000);
-    spotlight.position.set( 2000, 1000, 1500 );
-    spotlight.target.position.set( 0, 50, 0 );
-    spotlight.castShadow = true;
-    webglScene.add( spotlight );
+    var directionalLight = new THREE.DirectionalLight( 0xeeeeff, 0.5 );
+    directionalLight.position.set(0, 0, 1);
+    webglScene.add( directionalLight );
+
+    var spotlight1 = new THREE.SpotLight(0xFFFFFF, 0.8, 3000);
+    spotlight1.position.set( 0, 500, 1500 );
+    spotlight1.target.position.set( 0, 0, 0 );
+    spotlight1.castShadow = true;
+    //webglScene.add( spotlight1 );
 
     //
 
+    /*
     loader = new THREE.JSONLoader();
 
     loader.load( 'models/jack/jackinabox.js', function ( geometry, materials ) {
@@ -131,6 +142,25 @@ function init() {
         model.position.set(0, 50, 0);
 
         webglScene.add( model );
+
+    });
+    */
+
+    loader = new THREE.ColladaLoader();
+
+    /* Robot from 'WebGL: Up & Running Book' - licence applies, but it no longer appears */
+    /* to be up at the URL referenced in the book (turbosquid.com/FullPreview/Index.cfm/ID/475463) */
+    /* (It now redirects to another robot). If you're the creator of the model, */
+    /* please get in touch with me and I'll happily pay to use it. Thanks! */
+    loader.load( 'models/robot_cartoon_02/robot_cartoon_02.dae', function( collada ) {
+
+        robot = collada.scene;
+        robot.position.set(0, 0, -500);
+        robot.rotation.y = Math.PI / 4;
+
+        console.log( 'robot', robot );
+
+        webglScene.add( robot );
 
     });
 
