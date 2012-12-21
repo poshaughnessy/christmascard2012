@@ -160,7 +160,7 @@ function init() {
     loader.load( 'models/robot_cartoon_02/robot_cartoon_02.dae', function( collada ) {
 
         var model = collada.scene;
-        model.position.set(0, 0, -500);
+        model.position.set(1000, 0, -500);
         model.rotation.y = Math.PI / 4;
 
         console.log( 'robot model', model );
@@ -193,11 +193,16 @@ function init() {
         robot.leftLeg = model.getChildByName('ID93', true);
         robot.rightLeg = model.getChildByName('ID75', true);
 
+        robot.leftArm = model.getChildByName('ID376', true);
+        robot.rightArm = model.getChildByName('ID294', true);
+
         // Need to set this to allow us to change rotation of child elements
         robot.key.useQuaternion = false;
         robot.head.useQuaternion = false;
         robot.leftLeg.useQuaternion = false;
         robot.rightLeg.useQuaternion = false;
+        robot.leftArm.useQuaternion = false;
+        robot.rightArm.useQuaternion = false;
 
 
         var tweenTurn = new TWEEN.Tween( model.rotation )
@@ -238,8 +243,33 @@ function init() {
                 .to( { z: robot.rightLeg.rotation.z + (RAD_20) }, 1000 )
                 .easing( TWEEN.Easing.Quadratic.InOut );
 
-        tweenTurn.chain( tweenTurnBack );
-        tweenTurnBack.chain( tweenTurn );
+        var tweenLeftArmForwards = new TWEEN.Tween( robot.leftArm.rotation )
+                .to( { z: robot.leftArm.rotation.z - (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenLeftArmBackwards = new TWEEN.Tween( robot.leftArm.rotation )
+                .to( { z: robot.leftArm.rotation.z + (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenRightArmForwards = new TWEEN.Tween( robot.rightArm.rotation )
+                .to( { z: robot.rightArm.rotation.z - (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenRightArmBackwards = new TWEEN.Tween( robot.rightArm.rotation )
+                .to( { z: robot.rightArm.rotation.z + (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+
+        var tweenWalkToCentre = new TWEEN.Tween( model.position )
+                .to( { x: 0, z: 50 }, 10000 )
+                .onComplete(function() {
+                    console.log('hello?');
+                    tweenTurnBack.start();
+                });
+
+
+        //tweenTurn.chain( tweenTurnBack );
+        //tweenTurnBack.chain( tweenTurn );
 
         tweenKeyTurn.chain( tweenKeyTurn );
 
@@ -252,11 +282,21 @@ function init() {
         tweenRightLegForwards.chain( tweenRightLegBackwards );
         tweenRightLegBackwards.chain( tweenRightLegForwards );
 
-        tweenTurn.start();
+        tweenLeftArmForwards.chain( tweenLeftArmBackwards );
+        tweenLeftArmBackwards.chain( tweenLeftArmForwards );
+
+        tweenRightArmForwards.chain( tweenRightArmBackwards );
+        tweenRightArmBackwards.chain( tweenRightArmForwards );
+
+        //tweenTurn.start();
         tweenKeyTurn.start();
         tweenHeadTurn.start();
         tweenLeftLegForwards.start();
         tweenRightLegBackwards.start();
+        tweenLeftArmForwards.start();
+        tweenRightArmBackwards.start();
+
+        tweenWalkToCentre.start();
 
         webglScene.add( model );
 
