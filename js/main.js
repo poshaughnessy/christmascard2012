@@ -17,6 +17,7 @@ var FOV = 50;
 var NEAR = 1;
 var FAR = 10000;
 
+var RAD_20 = Math.PI / 9;
 var RAD_30 = Math.PI / 6;
 var RAD_45 = Math.PI / 4;
 var RAD_180 = Math.PI;
@@ -189,9 +190,14 @@ function init() {
         robot.key = model.getChildByName('ID65', true);
         robot.head = model.getChildByName('ID139', true);
 
+        robot.leftLeg = model.getChildByName('ID93', true);
+        robot.rightLeg = model.getChildByName('ID75', true);
+
         // Need to set this to allow us to change rotation of child elements
         robot.key.useQuaternion = false;
         robot.head.useQuaternion = false;
+        robot.leftLeg.useQuaternion = false;
+        robot.rightLeg.useQuaternion = false;
 
 
         var tweenTurn = new TWEEN.Tween( model.rotation )
@@ -216,6 +222,22 @@ function init() {
                 .to( { y: robot.head.rotation.y - (RAD_30) }, 3000 )
                 .easing( TWEEN.Easing.Quadratic.InOut );
 
+        var tweenLeftLegForwards = new TWEEN.Tween( robot.leftLeg.rotation )
+                .to( { z: robot.leftLeg.rotation.z - (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenLeftLegBackwards = new TWEEN.Tween( robot.leftLeg.rotation )
+                .to( { z: robot.leftLeg.rotation.z + (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenRightLegForwards = new TWEEN.Tween( robot.rightLeg.rotation )
+                .to( { z: robot.rightLeg.rotation.z - (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenRightLegBackwards = new TWEEN.Tween( robot.rightLeg.rotation )
+                .to( { z: robot.rightLeg.rotation.z + (RAD_20) }, 1000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
         tweenTurn.chain( tweenTurnBack );
         tweenTurnBack.chain( tweenTurn );
 
@@ -224,10 +246,17 @@ function init() {
         tweenHeadTurn.chain( tweenHeadTurnBack );
         tweenHeadTurnBack.chain( tweenHeadTurn );
 
+        tweenLeftLegForwards.chain( tweenLeftLegBackwards );
+        tweenLeftLegBackwards.chain( tweenLeftLegForwards );
+
+        tweenRightLegForwards.chain( tweenRightLegBackwards );
+        tweenRightLegBackwards.chain( tweenRightLegForwards );
+
         tweenTurn.start();
         tweenKeyTurn.start();
-
         tweenHeadTurn.start();
+        tweenLeftLegForwards.start();
+        tweenRightLegBackwards.start();
 
         webglScene.add( model );
 
