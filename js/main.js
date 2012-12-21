@@ -11,12 +11,16 @@ var particleImage = new Image();
 
 var loader;
 
-var robot;
+var robot = {};
 
 var FOV = 50;
 var NEAR = 1;
 var FAR = 10000;
+
+var RAD_30 = Math.PI / 6;
+var RAD_45 = Math.PI / 4;
 var RAD_180 = Math.PI;
+var RAD_360 = Math.PI * 2;
 
 init();
 animate();
@@ -154,13 +158,85 @@ function init() {
     /* please get in touch with me and I'll happily pay to use it. Thanks! */
     loader.load( 'models/robot_cartoon_02/robot_cartoon_02.dae', function( collada ) {
 
-        robot = collada.scene;
-        robot.position.set(0, 0, -500);
-        robot.rotation.y = Math.PI / 4;
+        var model = collada.scene;
+        model.position.set(0, 0, -500);
+        model.rotation.y = Math.PI / 4;
 
-        console.log( 'robot', robot );
+        console.log( 'robot model', model );
 
-        webglScene.add( robot );
+        // Walk through model looking for known named parts
+        /*
+        model.traverse( function(child) {
+            switch (child.name) {
+                case 'jambe_G' :
+                    robot.left_leg = child;
+                    break;
+                case 'jambe_D' :
+                    robot.right_leg = child;
+                    break;
+                case 'head_container' :
+                    robot.head = child;
+                    break;
+                case 'clef' :
+                    robot.key = child;
+                    break;
+            }
+        });
+        */
+
+        robot.model = model;
+
+        var tweenTurn = new TWEEN.Tween( model.rotation )
+                .to( { y: model.rotation.y - (RAD_45) }, 3000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenTurnBack = new TWEEN.Tween( model.rotation )
+                .to( { y: model.rotation.y + (RAD_45) }, 3000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        robot.key = model.getChildByName('ID65', true);
+
+        console.log('Robot key:', robot.key);
+
+        var tweenKeyTurn = new TWEEN.Tween( robot.key.rotation )
+                .to( { x: robot.key.rotation.x - (RAD_360) }, 5000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+
+        robot.head = model.getChildByName('ID139', true);
+
+        robot.head.visible = false;
+
+        // To allow us to change rotation
+        robot.head.useQuaternion = false;
+
+        //robot.head.scale.set(0.1, 0.1, 0.1);
+        //robot.head.rotation.set(0, Math.PI * 0.6, 0);
+
+        console.log('Robot head:', robot.head);
+
+        var tweenHeadTurn = new TWEEN.Tween( robot.head.rotation )
+                .to( { y: robot.head.rotation.y + (RAD_30) }, 3000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        var tweenHeadTurnBack = new TWEEN.Tween( robot.head.rotation )
+                .to( { y: robot.head.rotation.y - (RAD_30) }, 3000 )
+                .easing( TWEEN.Easing.Quadratic.InOut );
+
+        tweenTurn.chain( tweenTurnBack );
+        tweenTurnBack.chain( tweenTurn );
+
+        //tweenKeyTurn.chain( tweenKeyTurn );
+        tweenHeadTurn.chain( tweenHeadTurnBack );
+        tweenHeadTurnBack.chain( tweenHeadTurn );
+
+        tweenTurn.start();
+        tweenKeyTurn.start();
+
+        tweenHeadTurn.start();
+
+        webglScene.add( model );
+
 
     });
 
@@ -180,11 +256,50 @@ function animate() {
 
     TWEEN.update();
 
+    //animateRobot();
+
     animateSnow();
+
+    // XXX Testing
+    //robot.model.matrixAutoUpdate = false;
+    if( robot.model != undefined ) {
+        robot.model.updateMatrix();
+        robot.model.matrixWorldNeedsUpdate = true;
+    }
 
     cssRenderer.render( cssScene, camera );
     canvasRenderer.render( canvasScene, camera );
     webglRenderer.render( webglScene, camera );
+
+}
+
+function animateRobot() {
+
+    var frameTime = ( timestamp - lastTimestamp ) * 0.001; // seconds
+
+    if ( progress >= 0 && progress < 48 ) {
+
+        for ( var i = 0; i < kfAnimationsLength; ++i ) {
+
+            kfAnimations[ i ].update( frameTime );
+
+        }
+
+    } else if ( progress >= 48 ) {
+
+        for ( var i = 0; i < kfAnimationsLength; ++i ) {
+
+            kfAnimations[ i ].stop();
+
+        }
+
+        progress = 0;
+        start();
+
+    }
+
+    progress += frameTime;
+    lastTimestamp = timestamp;
 
 }
 
@@ -271,6 +386,47 @@ function animateSnow() {
     }
 
 }
+
+robotHeadRotationKeys = [0, .25, .5, .75, 1];
+robotHeadRotationValues = [ { z: 0 },
+    { z: -Math.PI / 96 },
+    { z: 0 },
+    { z: Math.PI / 96 },
+    { z: 0 }
+];
+
+robotBodyRotationKeys = [0, .25, .5, .75, 1];
+robotBodyRotationValues = [ { x: 0 },
+    { x: -Math.PI / 48 },
+    { x: 0 },
+    { x: Math.PI / 48 },
+    { x: 0 }
+];
+
+robotKeyRotationKeys = [0, .25, .5, .75, 1];
+robotKeyRotationValues = [ { x: 0 },
+    { x: Math.PI / 4 },
+    { x: Math.PI / 2 },
+    { x: Math.PI * 3 / 4 },
+    { x: Math.PI }
+];
+
+robotLeftLegRotationKeys = [0, .25, .5, .75, 1];
+robotLeftLegRotationValues = [ { z: 0 },
+    { z: Math.PI / 6},
+    { z: 0 },
+    { z: 0 },
+    { z: 0 }
+];
+
+robotRightLegRotationKeys = [0, .25, .5, .75, 1];
+robotRightLegRotationValues = [ { z: 0 },
+    { z: 0 },
+    { z: 0 },
+    { z: Math.PI / 6},
+    { z: 0 }
+];
+
 
 function onWindowResize() {
 
