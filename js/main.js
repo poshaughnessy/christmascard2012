@@ -186,6 +186,14 @@ function init() {
 
         robot.model = model;
 
+        robot.key = model.getChildByName('ID65', true);
+        robot.head = model.getChildByName('ID139', true);
+
+        // Need to set this to allow us to change rotation of child elements
+        robot.key.useQuaternion = false;
+        robot.head.useQuaternion = false;
+
+
         var tweenTurn = new TWEEN.Tween( model.rotation )
                 .to( { y: model.rotation.y - (RAD_45) }, 3000 )
                 .easing( TWEEN.Easing.Quadratic.InOut );
@@ -194,26 +202,11 @@ function init() {
                 .to( { y: model.rotation.y + (RAD_45) }, 3000 )
                 .easing( TWEEN.Easing.Quadratic.InOut );
 
-        robot.key = model.getChildByName('ID65', true);
-
-        console.log('Robot key:', robot.key);
-
         var tweenKeyTurn = new TWEEN.Tween( robot.key.rotation )
-                .to( { x: robot.key.rotation.x - (RAD_360) }, 5000 )
-                .easing( TWEEN.Easing.Quadratic.InOut );
-
-
-        robot.head = model.getChildByName('ID139', true);
-
-        robot.head.visible = false;
-
-        // To allow us to change rotation
-        robot.head.useQuaternion = false;
-
-        //robot.head.scale.set(0.1, 0.1, 0.1);
-        //robot.head.rotation.set(0, Math.PI * 0.6, 0);
-
-        console.log('Robot head:', robot.head);
+                .to( { x: robot.key.rotation.x - (RAD_360) }, 3000)
+                .onComplete(function() {
+                    robot.key.rotation.x = 0;
+                });
 
         var tweenHeadTurn = new TWEEN.Tween( robot.head.rotation )
                 .to( { y: robot.head.rotation.y + (RAD_30) }, 3000 )
@@ -226,7 +219,8 @@ function init() {
         tweenTurn.chain( tweenTurnBack );
         tweenTurnBack.chain( tweenTurn );
 
-        //tweenKeyTurn.chain( tweenKeyTurn );
+        tweenKeyTurn.chain( tweenKeyTurn );
+
         tweenHeadTurn.chain( tweenHeadTurnBack );
         tweenHeadTurnBack.chain( tweenHeadTurn );
 
