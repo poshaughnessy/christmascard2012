@@ -20,6 +20,7 @@ var FAR = 10000;
 var RAD_20 = Math.PI / 9;
 var RAD_30 = Math.PI / 6;
 var RAD_45 = Math.PI / 4;
+var RAD_90 = Math.PI / 2;
 var RAD_180 = Math.PI;
 var RAD_360 = Math.PI * 2;
 
@@ -68,88 +69,61 @@ function init() {
     webglRenderer.setSize( window.innerWidth, window.innerHeight );
     webglRenderer.domElement.style.position = 'absolute';
     webglRenderer.domElement.style.top = 0;
+    webglRenderer.shadowMapEnabled = true;
     document.body.appendChild( webglRenderer.domElement );
 
+    // Ground
 
-    //
+    var planeGeometry = new THREE.PlaneGeometry(1024, 1024);
+    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, ambient: 0xeeeeee});
 
-    var texture = new THREE.Texture();
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.scale.set(10, 10, 10);
+    plane.rotation.x = -RAD_90;
+    plane.position.y = -50;
+    plane.receiveShadow = true;
 
-    /*
-    var loader = new THREE.ImageLoader();
-    loader.addEventListener( 'load', function ( event ) {
+    webglScene.add( plane );
 
-        texture.image = event.content;
-        texture.needsUpdate = true;
-
-    } );
-    loader.load( 'models/jack/Gift-Wrapping-Paper.jpg' );
-    */
-
-    //
-
-    /* This is loading in the model but not the textures... */
-    /*
-    loader = new THREE.OBJLoader();
-
-    loader.addEventListener( 'load', function ( event ) {
-
-        var object = event.content;
-
-        for ( var i = 0, l = object.children.length; i < l; i ++ ) {
-            //object.children[ i ].material.map = texture;
-            console.log( object.children[i].material );
-        }
-
-        object.position.set( 0, 50, 0 );
-        object.scale.set(20, 20, 20);
-
-        webglScene.add( object );
-
-        webglRenderer.render( webglScene, camera )
-
-    });
-    loader.load( 'models/jack/jackinabox.obj' );
-    */
-
-    //
-
-    var ambientLight = new THREE.AmbientLight( 0x101010 );
-    webglScene.add( ambientLight );
-
-    var directionalLight = new THREE.DirectionalLight( 0xeeeeff, 0.5 );
-    directionalLight.position.set(0, 0, 1);
-    webglScene.add( directionalLight );
-
-    var spotlight1 = new THREE.SpotLight(0xFFFFFF, 0.8, 3000);
-    spotlight1.position.set( 0, 500, 1500 );
-    spotlight1.target.position.set( 0, 0, 0 );
-    spotlight1.castShadow = true;
-    //webglScene.add( spotlight1 );
-
-    //
-
-    /*
     loader = new THREE.JSONLoader();
 
-    loader.load( 'models/jack/jackinabox.js', function ( geometry, materials ) {
+    // Christmas tree
 
-        console.log('xxx geometry:', geometry);
-        console.log('xxx materials: ', materials);
+    loader.load( 'models/christmastree/cartoon_pine_tree.js', function(geometry, materials) {
 
         var model = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-        model.geometry.computeFaceNormals();
-        model.geometry.computeVertexNormals();
 
-        var modelScale = 20;
-        model.scale.set(modelScale, modelScale, modelScale);
-
-        model.position.set(0, 50, 0);
+        model.position.set( -650, -250, -1500 );
+        model.scale.set(4, 4, 4);
 
         webglScene.add( model );
 
     });
-    */
+
+    // Lighting
+
+    var ambientLight = new THREE.AmbientLight( 0x101010 );
+    //webglScene.add( ambientLight );
+
+    var directionalLight = new THREE.DirectionalLight( 0xeeeeff, 0.2 );
+    directionalLight.position.set(0, 0, 1);
+    webglScene.add( directionalLight );
+
+    var downLight = new THREE.DirectionalLight( 0xeeeeff, 0.2 );
+    downLight.position.set(0, 1, 0);
+    webglScene.add( downLight );
+
+    var spotlight1 = new THREE.SpotLight(0xFFFFFF, 1.0, 3500);
+    spotlight1.position.set( 0, 1500, 500 );
+    spotlight1.target.position.set( 0, 0, 0 );
+    spotlight1.castShadow = true;
+    spotlight1.shadowCameraNear = 1; // keep near and far planes as tight as possible
+    spotlight1.shadowCameraFar = 3500; // shadows not cast past the far plane
+    spotlight1.shadowCameraVisible = true;
+    webglScene.add( spotlight1 );
+
+
+    // Robot
 
     loader = new THREE.ColladaLoader();
 
@@ -157,6 +131,7 @@ function init() {
     /* to be up at the URL referenced in the book (turbosquid.com/FullPreview/Index.cfm/ID/475463) */
     /* (It now redirects to another robot). If you're the creator of the model, */
     /* please get in touch with me and I'll happily pay to use it. Thanks! */
+
     loader.load( 'models/robot_cartoon_02/robot_cartoon_02.dae', function( collada ) {
 
         var model = collada.scene;
@@ -165,36 +140,31 @@ function init() {
 
         console.log( 'robot model', model );
 
-        // Walk through model looking for known named parts
-        /*
-        model.traverse( function(child) {
-            switch (child.name) {
-                case 'jambe_G' :
-                    robot.left_leg = child;
-                    break;
-                case 'jambe_D' :
-                    robot.right_leg = child;
-                    break;
-                case 'head_container' :
-                    robot.head = child;
-                    break;
-                case 'clef' :
-                    robot.key = child;
-                    break;
-            }
+        // Apply castShadow to child meshes (needs to be set on Mesh, not Object3D)
+        model.traverse(function( child ) {
+            child.castShadow = true;
         });
-        */
+        //model.castShadow = true;
+        //model.children[0].castShadow = true;
+        //model.children[0].children[0].children[0].castShadow = true;
+        //model.children[0].children[0].children[1].castShadow = true;
+        //model.children[0].children[0].children[2].castShadow = true;
+        //model.children[0].children[0].children[3].castShadow = true;
+        //model.children[0].children[0].children[4].castShadow = true;
+        //model.children[0].children[0].children[5].castShadow = true;
+        //model.children[0].children[0].children[6].castShadow = true;
 
         robot.model = model;
 
         robot.key = model.getChildByName('ID65', true);
         robot.head = model.getChildByName('ID139', true);
-
         robot.leftLeg = model.getChildByName('ID93', true);
         robot.rightLeg = model.getChildByName('ID75', true);
-
         robot.leftArm = model.getChildByName('ID376', true);
         robot.rightArm = model.getChildByName('ID294', true);
+
+        // Right arm is not quite in the right place for some reason
+        robot.rightArm.position.z -= 20;
 
         // Need to set this to allow us to change rotation of child elements
         robot.key.useQuaternion = false;
@@ -204,10 +174,11 @@ function init() {
         robot.leftArm.useQuaternion = false;
         robot.rightArm.useQuaternion = false;
 
-
+        /*
         var tweenTurn = new TWEEN.Tween( model.rotation )
                 .to( { y: model.rotation.y - (RAD_45) }, 3000 )
                 .easing( TWEEN.Easing.Quadratic.InOut );
+        */
 
         var tweenTurnBack = new TWEEN.Tween( model.rotation )
                 .to( { y: model.rotation.y + (RAD_45) }, 3000 )
@@ -263,7 +234,6 @@ function init() {
         var tweenWalkToCentre = new TWEEN.Tween( model.position )
                 .to( { x: 0, z: 50 }, 10000 )
                 .onComplete(function() {
-                    console.log('hello?');
                     tweenTurnBack.start();
                 });
 
@@ -319,8 +289,6 @@ function animate() {
 
     TWEEN.update();
 
-    //animateRobot();
-
     animateSnow();
 
     // XXX Testing
@@ -333,36 +301,6 @@ function animate() {
     cssRenderer.render( cssScene, camera );
     canvasRenderer.render( canvasScene, camera );
     webglRenderer.render( webglScene, camera );
-
-}
-
-function animateRobot() {
-
-    var frameTime = ( timestamp - lastTimestamp ) * 0.001; // seconds
-
-    if ( progress >= 0 && progress < 48 ) {
-
-        for ( var i = 0; i < kfAnimationsLength; ++i ) {
-
-            kfAnimations[ i ].update( frameTime );
-
-        }
-
-    } else if ( progress >= 48 ) {
-
-        for ( var i = 0; i < kfAnimationsLength; ++i ) {
-
-            kfAnimations[ i ].stop();
-
-        }
-
-        progress = 0;
-        start();
-
-    }
-
-    progress += frameTime;
-    lastTimestamp = timestamp;
 
 }
 
@@ -449,47 +387,6 @@ function animateSnow() {
     }
 
 }
-
-robotHeadRotationKeys = [0, .25, .5, .75, 1];
-robotHeadRotationValues = [ { z: 0 },
-    { z: -Math.PI / 96 },
-    { z: 0 },
-    { z: Math.PI / 96 },
-    { z: 0 }
-];
-
-robotBodyRotationKeys = [0, .25, .5, .75, 1];
-robotBodyRotationValues = [ { x: 0 },
-    { x: -Math.PI / 48 },
-    { x: 0 },
-    { x: Math.PI / 48 },
-    { x: 0 }
-];
-
-robotKeyRotationKeys = [0, .25, .5, .75, 1];
-robotKeyRotationValues = [ { x: 0 },
-    { x: Math.PI / 4 },
-    { x: Math.PI / 2 },
-    { x: Math.PI * 3 / 4 },
-    { x: Math.PI }
-];
-
-robotLeftLegRotationKeys = [0, .25, .5, .75, 1];
-robotLeftLegRotationValues = [ { z: 0 },
-    { z: Math.PI / 6},
-    { z: 0 },
-    { z: 0 },
-    { z: 0 }
-];
-
-robotRightLegRotationKeys = [0, .25, .5, .75, 1];
-robotRightLegRotationValues = [ { z: 0 },
-    { z: 0 },
-    { z: 0 },
-    { z: Math.PI / 6},
-    { z: 0 }
-];
-
 
 function onWindowResize() {
 
