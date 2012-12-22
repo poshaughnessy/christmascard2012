@@ -34,7 +34,6 @@ var backgroundMusic = new buzz.sound('media/Jingle_Bells_Jazzy', {
     });
 
 init();
-animate();
 
 function init() {
 
@@ -42,6 +41,8 @@ function init() {
         document.getElementById('noWebGL').style.display = 'block';
         return;
     }
+
+    console.log('passed test!');
 
     camera = new THREE.PerspectiveCamera( FOV, window.innerWidth / window.innerHeight, NEAR, FAR );
     camera.position.set( 0, 500, 1000 );
@@ -153,8 +154,6 @@ function init() {
         model.position.set(1000, 0, -500);
         model.rotation.y = Math.PI / 4;
 
-        console.log( 'robot model', model );
-
         // Apply castShadow to child meshes (needs to be set on Mesh, not Object3D)
         model.traverse(function( child ) {
             child.castShadow = true;
@@ -191,6 +190,7 @@ function init() {
 
     document.addEventListener('keydown', onKeyDown, false);
 
+    animate();
 
 }
 
@@ -300,7 +300,6 @@ function playMessage() {
         document.getElementById('speechBubble').style.display = 'block';
 
         robotMessage.play().bind( 'ended.buzzloop', function() {
-            console.log('Finished message');
             backgroundMusic.play().fadeIn();
         });
     });
@@ -330,7 +329,7 @@ function animate() {
 
 function openCard() {
 
-    console.log('Open card');
+    //console.log('Open card');
 
     new TWEEN.Tween( cardFrontContainer.rotation )
             .to( { y: cardFrontContainer.rotation.y - (RAD_180) }, 1000 )
@@ -341,7 +340,7 @@ function openCard() {
 
 function closeCard() {
 
-    console.log('Close card');
+    //console.log('Close card');
 
     new TWEEN.Tween( cardFrontContainer.rotation )
             .to( { y: cardFrontContainer.rotation.y + (RAD_180) }, 1000 )
