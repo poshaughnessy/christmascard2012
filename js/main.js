@@ -38,6 +38,11 @@ animate();
 
 function init() {
 
+    if( !Detector.webgl ) {
+        document.getElementById('noWebGL').style.display = 'block';
+        return;
+    }
+
     camera = new THREE.PerspectiveCamera( FOV, window.innerWidth / window.innerHeight, NEAR, FAR );
     camera.position.set( 0, 500, 1000 );
     camera.lookAt( new THREE.Vector3(0, 100, -500) );
