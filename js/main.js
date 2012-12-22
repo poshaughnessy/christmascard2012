@@ -75,12 +75,11 @@ function init() {
     // Ground
 
     var planeGeometry = new THREE.PlaneGeometry(1024, 1024);
-    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, ambient: 0xeeeeee});
+    var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
 
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.scale.set(10, 10, 10);
     plane.rotation.x = -RAD_90;
-    plane.position.y = -50;
     plane.receiveShadow = true;
 
     webglScene.add( plane );
@@ -93,8 +92,10 @@ function init() {
 
         var model = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
-        model.position.set( -650, -250, -1500 );
-        model.scale.set(4, 4, 4);
+        model.position.set( -650, 0, -1200 );
+        model.scale.set(3, 3, 3);
+
+        model.castShadow = true;
 
         webglScene.add( model );
 
@@ -113,13 +114,13 @@ function init() {
     downLight.position.set(0, 1, 0);
     webglScene.add( downLight );
 
-    var spotlight1 = new THREE.SpotLight(0xFFFFFF, 1.0, 3500);
-    spotlight1.position.set( 0, 1500, 500 );
+    var spotlight1 = new THREE.SpotLight(0xFFFFFF, 1.0, 5000);
+    spotlight1.position.set( 0, 3500, 500 );
     spotlight1.target.position.set( 0, 0, 0 );
     spotlight1.castShadow = true;
     spotlight1.shadowCameraNear = 1; // keep near and far planes as tight as possible
-    spotlight1.shadowCameraFar = 3500; // shadows not cast past the far plane
-    spotlight1.shadowCameraVisible = true;
+    spotlight1.shadowCameraFar = 5000; // shadows not cast past the far plane
+    //spotlight1.shadowCameraVisible = true;
     webglScene.add( spotlight1 );
 
 

@@ -1,8 +1,8 @@
 body {
-    background-color: #406B2E;
+    background-color: #53bce3;
     background-repeat: no-repeat;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CD12E), to(#406B2E)) fixed;
-    background: -moz-linear-gradient(100% 100% 90deg, #406B2E, #5CD12E);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#53bce3), to(#6cafee)) fixed;
+    background: -moz-linear-gradient(100% 100% 90deg, #6cafee, #53bce3);
     margin: 0;
     overflow: hidden;
 }
