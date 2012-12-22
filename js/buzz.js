@@ -128,6 +128,13 @@ var buzz = {
 
             this.sound.loop = 'loop';
             this.bind( 'ended.buzzloop', function() {
+                // XXX Fudge added by Peter for Chrome
+                // See: http://stackoverflow.com/questions/8733330/
+                console.log('XXX ended buzzloop!');
+                if (window.chrome) {
+                    console.log('Reloading audio for Chrome');
+                    this.load();
+                }
                 this.currentTime = 0;
                 this.play();
             });

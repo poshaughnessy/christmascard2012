@@ -29,7 +29,7 @@ var robotMessage = new buzz.sound('media/robotmessage', {
     });
 
 var backgroundMusic = new buzz.sound('media/Jingle_Bells_Jazzy', {
-        formats: ['ogg', 'acc'],
+        formats: ['ogg', 'mp3', 'acc'],
         loop: true
     });
 
@@ -249,15 +249,13 @@ function setUpRobotAnimations() {
 
     var tweenTurnBack = new TWEEN.Tween( robot.model.rotation )
             .to( { y: robot.model.rotation.y + (RAD_45) }, 3000 )
-            .easing( TWEEN.Easing.Quadratic.InOut )
-            .onComplete(function() {
-                playMessage();
-            });
+            .easing( TWEEN.Easing.Quadratic.InOut );
 
     var tweenWalkToCentre = new TWEEN.Tween( robot.model.position )
-            .to( { x: 0, z: 100 }, 10000 )
+            .to( { x: 0, z: 300 }, 10000 )
             .onComplete(function() {
                 tweenTurnBack.start();
+                playMessage();
             });
 
 
@@ -293,6 +291,8 @@ function playMessage() {
 
     backgroundMusic.fadeOut(function() {
         backgroundMusic.pause();
+
+        document.getElementById('speechBubble').style.display = 'block';
 
         robotMessage.play().bind( 'ended.buzzloop', function() {
             console.log('Finished message');
